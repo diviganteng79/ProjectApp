@@ -1,0 +1,13 @@
+<h3>Developer Panel</h3>
+<input id="no" placeholder="No KTA">
+<input id="nama" placeholder="Nama">
+<input id="status" placeholder="Status">
+<input id="join" placeholder="Join">
+<button onclick="buat()">Buat JSON</button>
+<pre id="out"></pre>
+<script>
+function buat(){
+ const d={no_kta:no.value,nama:nama.value,status:status.value,join:join.value,foto:"img/default.png"};
+ out.textContent=JSON.stringify(d,null,2);
+}
+</script>
