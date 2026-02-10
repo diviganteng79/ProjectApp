@@ -1,3 +1,10 @@
+function toggleDevActions() {
+  const kta = localStorage.getItem("login");
+  const el = document.getElementById("devActions");
+  if (!el) return;
+  el.style.display = kta === "0812180001" ? "block" : "none";
+}
+
 async function renderDashboard() {
   await seedUsersIfNeeded();
   const kta = localStorage.getItem("login");
@@ -5,6 +12,8 @@ async function renderDashboard() {
     location.href = "index.html";
     return;
   }
+
+  toggleDevActions();
 
   const d = getUsers();
   let h = "<tr><th>No</th><th>Nama</th><th>Status</th><th>KTA</th><th>Join</th></tr>";
