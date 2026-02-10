@@ -1,9 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head><title>Developer Panel</title></head>
+<body>
 <h3>Developer Panel</h3>
 <input id="no" placeholder="No KTA">
 <input id="nama" placeholder="Nama">
 <input id="status" placeholder="Status">
 <input id="join" placeholder="Join">
 <button onclick="buat()">Buat JSON</button>
+<button onclick="buat()">Simpan Data Anggota</button>
 <pre id="out"></pre>
 <script>
 function buat(){
@@ -11,3 +16,13 @@ function buat(){
  out.textContent=JSON.stringify(d,null,2);
 }
 </script>
+
+<h4>Data Anggota Terdaftar</h4>
+<table border="1" id="devList"></table>
+<br>
+<a href="dashboard.html">Lihat Beranda</a>
+
+<script src="js/store.js"></script>
+<script src="js/dev.js"></script>
+</body>
+</html>
