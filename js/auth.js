@@ -10,41 +10,13 @@ async function login(){
  else if(s!==pass){alert("Password salah");return;}
  localStorage.setItem("login",kta);
  location.href=kta==="0812180001"?"dev.html":"dashboard.html";
-async function setupLoginForm() {
-  await seedUsersIfNeeded();
-  const ktaEl = document.getElementById("kta");
-  const passEl = document.getElementById("pass");
-  const hintEl = document.getElementById("hint");
+let selectedKta = "";
 
-  function refreshState() {
-    const kta = ktaEl.value.trim();
-    if (!kta) {
-      passEl.disabled = true;
-      passEl.placeholder = "Password";
-      hintEl.textContent = "Isi nomor KTA terlebih dahulu.";
-      return;
-    }
-
-    const u = findUserByKta(kta);
-    if (!u) {
-      passEl.disabled = true;
-      hintEl.textContent = "Nomor KTA belum didaftarkan developer.";
-      return;
-    }
-
-    passEl.disabled = false;
-    const savedPass = localStorage.getItem("pass_" + kta);
-    if (savedPass) {
-      passEl.placeholder = "Password";
-      hintEl.textContent = "Masukkan password untuk login.";
-    } else {
-      passEl.placeholder = "Buat password baru";
-      hintEl.textContent = "Login pertama: buat password baru Anda.";
-    }
-  }
-
-  ktaEl.addEventListener("input", refreshState);
-  refreshState();
+function showStep(stepId) {
+  document.getElementById("step-kta").style.display = "none";
+  document.getElementById("step-create").style.display = "none";
+  document.getElementById("step-login").style.display = "none";
+  document.getElementById(stepId).style.display = "block";
 }
 function reset(){
  const kta=prompt("Nomor KTA");
@@ -53,9 +25,87 @@ function reset(){
  location.href="mailto:diviganteng79@gmail.com?subject=Reset Sandi&body=No KTA:"+kta+"%0A"+p;
 }
 
+function setHint(message) {
+  document.getElementById("hint").textContent = message || "";
+}
+
+async function initAuth() {
+  await seedUsersIfNeeded();
+  const devPassKey = "pass_0812180001";
+  if (!localStorage.getItem(devPassKey)) {
+    localStorage.setItem(devPassKey, "Devjsc");
+  }
+  showStep("step-kta");
+  setHint("Masukkan nomor KTA untuk melanjutkan.");
+}
+
+async function checkKta() {
+  await seedUsersIfNeeded();
+  const kta = (document.getElementById("ktaCheck").value || "").trim();
+  if (!kta) {
+    alert("Isi nomor KTA terlebih dahulu");
+    setHint("Nomor KTA wajib diisi.");
+    return;
+  }
+
+  const user = findUserByKta(kta);
+  if (!user) {
+    alert("Nomor KTA belum terdaftar");
+    setHint("Nomor KTA belum terdaftar oleh developer.");
+    return;
+  }
+
+  selectedKta = kta;
+
+  const savedPass = localStorage.getItem("pass_" + kta);
+  if (!savedPass) {
+    document.getElementById("newPass").value = "";
+    document.getElementById("confirmPass").value = "";
+    showStep("step-create");
+    setHint("KTA terdaftar. Silakan buat kata sandi.");
+    return;
+  }
+
+  document.getElementById("kta").value = kta;
+  document.getElementById("pass").value = "";
+  showStep("step-login");
+  setHint("KTA terdaftar. Silakan login.");
+}
+
+function createPassword() {
+  const kta = selectedKta;
+  if (!kta) {
+    alert("Nomor KTA belum dipilih");
+    showStep("step-kta");
+    return;
+  }
+
+  const p1 = document.getElementById("newPass").value;
+  const p2 = document.getElementById("confirmPass").value;
+
+  if (!p1 || !p2) {
+    alert("Isi kata sandi dan ulangi kata sandi");
+    return;
+  }
+
+  if (p1 !== p2) {
+    alert("Ulangi kata sandi tidak sama");
+    setHint("Pastikan kata sandi dan ulangi kata sandi sama.");
+    return;
+  }
+
+  localStorage.setItem("pass_" + kta, p1);
+  alert("Kata sandi berhasil dibuat");
+
+  document.getElementById("kta").value = kta;
+  document.getElementById("pass").value = "";
+  showStep("step-login");
+  setHint("Kata sandi tersimpan. Silakan login.");
+}
+
 async function login() {
   await seedUsersIfNeeded();
-  const kta = document.getElementById("kta").value.trim();
+  const kta = (document.getElementById("kta").value || "").trim();
   const pass = document.getElementById("pass").value;
 
   if (!kta) {
@@ -63,23 +113,21 @@ async function login() {
     return;
   }
 
-  const u = findUserByKta(kta);
-  if (!u) {
+  const user = findUserByKta(kta);
+  if (!user) {
     alert("KTA tidak terdaftar");
     return;
   }
 
-  const key = "pass_" + kta;
-  const savedPass = localStorage.getItem(key);
-
+  const savedPass = localStorage.getItem("pass_" + kta);
   if (!savedPass) {
-    if (!pass) {
-      alert("Login pertama, silakan buat password baru.");
-      return;
-    }
-    localStorage.setItem(key, pass);
-    alert("Password berhasil dibuat. Login berhasil.");
-  } else if (savedPass !== pass) {
+    alert("Kata sandi belum dibuat. Silakan buat kata sandi terlebih dahulu.");
+    selectedKta = kta;
+    showStep("step-create");
+    return;
+  }
+
+  if (savedPass !== pass) {
     alert("Password salah");
     return;
   }
@@ -99,4 +147,4 @@ function reset() {
     encodeURIComponent(p);
 }
 
-setupLoginForm();
+initAuth();
