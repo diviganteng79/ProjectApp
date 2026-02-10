@@ -1,16 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head><title>Profil</title></head>
+<body>
 <img id="foto" width="120"><br>
 <button onclick="logout()">Logout</button>
+<script src="js/store.js"></script>
 <script>
 (async ()=>{
+ await seedUsersIfNeeded();
  const kta=localStorage.getItem("login");
  if(!kta) location.href="index.html";
  const r=await fetch("data/kta.json");
  const d=await r.json();
  const u=d.find(x=>x.no_kta===kta);
  foto.src=u.foto;
+ const u=findUserByKta(kta);
+ if(!u){
+  alert("Data akun tidak ditemukan");
+  location.href="index.html";
+  return;
+ }
+ foto.src=u.foto||"img/default.png";
 })();
 function logout(){
  localStorage.removeItem("login");
  location.href="index.html";
 }
 </script>
+</script>
+</body>
+</html>
