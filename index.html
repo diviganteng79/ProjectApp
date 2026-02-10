@@ -5,9 +5,31 @@
 <h3>Login KTA</h3>
 <input id="kta" placeholder="Nomor KTA"><br>
 <input id="pass" type="password" placeholder="Password"><br>
-<small id="hint"></small><br><br>
 <button onclick="login()">Login</button>
 <button onclick="reset()">Reset Sandi</button>
+
+<div id="step-kta">
+  <input id="ktaCheck" placeholder="Masukkan Nomor KTA"><br><br>
+  <button onclick="checkKta()">Lanjut</button>
+</div>
+
+<div id="step-create" style="display:none;">
+  <h4>Buat Kata Sandi</h4>
+  <input id="newPass" type="password" placeholder="Kata Sandi Baru"><br>
+  <input id="confirmPass" type="password" placeholder="Ulangi Kata Sandi"><br><br>
+  <button onclick="createPassword()">Simpan Kata Sandi</button>
+</div>
+
+<div id="step-login" style="display:none;">
+  <h4>Form Login</h4>
+  <input id="kta" placeholder="Nomor KTA"><br>
+  <input id="pass" type="password" placeholder="Password"><br><br>
+  <button onclick="login()">Login</button>
+  <button onclick="reset()">Reset Sandi</button>
+</div>
+
+<small id="hint"></small>
+
 <script src="js/store.js"></script>
 <script src="js/auth.js"></script>
 </body>
