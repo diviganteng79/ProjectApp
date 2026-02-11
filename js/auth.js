@@ -1,11 +1,13 @@
+import { auth } from "./firebase.js";
+import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { seedUsersIfNeeded, findUserByKta, ktaToEmail } from "./store.js";
+
 function setHint(message) {
   document.getElementById("hint").textContent = message || "";
 }
 
 async function initLoginForm() {
   await seedUsersIfNeeded();
-  localStorage.setItem("pass_0812180001", "Devjsc");
-
   const pendingKta = (sessionStorage.getItem("pending_kta") || "").trim();
   if (pendingKta) {
     document.getElementById("kta").value = pendingKta;
@@ -14,31 +16,23 @@ async function initLoginForm() {
 }
 
 async function login() {
-  await seedUsersIfNeeded();
   const kta = (document.getElementById("kta").value || "").trim();
   const pass = document.getElementById("pass").value;
 
-  if (!kta) {
-    alert("Isi nomor KTA");
-    return;
-  }
+  if (!kta) return alert("Isi nomor KTA");
+  if (!pass) return alert("Isi kata sandi");
 
-  const user = findUserByKta(kta);
-  if (!user) {
-    alert("KTA tidak terdaftar");
-    return;
-  }
+  const user = await findUserByKta(kta);
+  if (!user) return alert("KTA tidak terdaftar");
 
-  const savedPass = localStorage.getItem("pass_" + kta);
-  if (!savedPass) {
-    alert("Kata sandi belum dibuat. Silakan cek KTA lagi.");
-    sessionStorage.setItem("pending_kta", kta);
-    location.href = "set-password.html";
-    return;
-  }
-
-  if (savedPass !== pass) {
-    alert("Password salah");
+  try {
+    await signInWithEmailAndPassword(auth, ktaToEmail(kta), pass);
+  } catch (e) {
+    if (e.code === "auth/invalid-credential") {
+      alert("Password salah / akun belum dibuat");
+      return;
+    }
+    alert("Gagal login: " + e.message);
     return;
   }
 
@@ -58,4 +52,6 @@ function reset() {
     encodeURIComponent(p);
 }
 
+window.login = login;
+window.reset = reset;
 initLoginForm();
