@@ -1,22 +1,21 @@
+import { auth } from "./firebase.js";
+import { fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { seedUsersIfNeeded, findUserByKta, ktaToEmail } from "./store.js";
+
 function setHint(message) {
   document.getElementById("hint").textContent = message || "";
 }
 
 async function initKtaCheck() {
   await seedUsersIfNeeded();
-  localStorage.setItem("pass_0812180001", "Devjsc");
   setHint("Masukkan nomor KTA untuk lanjut.");
 }
 
 async function checkKta() {
-  await seedUsersIfNeeded();
   const kta = (document.getElementById("ktaCheck").value || "").trim();
-  if (!kta) {
-    alert("Isi nomor KTA terlebih dahulu");
-    return;
-  }
+  if (!kta) return alert("Isi nomor KTA terlebih dahulu");
 
-  const user = findUserByKta(kta);
+  const user = await findUserByKta(kta);
   if (!user) {
     alert("Nomor KTA belum terdaftar");
     setHint("Nomor KTA belum terdaftar oleh developer.");
@@ -24,8 +23,9 @@ async function checkKta() {
   }
 
   sessionStorage.setItem("pending_kta", kta);
-  const hasPass = localStorage.getItem("pass_" + kta);
-  location.href = hasPass ? "login.html" : "set-password.html";
+  const methods = await fetchSignInMethodsForEmail(auth, ktaToEmail(kta));
+  location.href = methods.length ? "login.html" : "set-password.html";
 }
 
+window.checkKta = checkKta;
 initKtaCheck();
