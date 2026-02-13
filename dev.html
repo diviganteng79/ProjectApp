@@ -1,14 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head><title>Developer Panel</title></head>
-<body>
-<h3>Developer Panel</h3>
 <input id="no" placeholder="No KTA">
 <input id="nama" placeholder="Nama">
 <input id="status" placeholder="Status">
 <input id="join" placeholder="Join">
+<input id="fotoFile" type="file" accept="image/*">
 <button onclick="buat()">Simpan Data Anggota</button>
 <pre id="out"></pre>
+
+<h4>Ganti Foto Profil User Terdaftar</h4>
+<input id="targetKta" placeholder="No KTA target">
+<input id="targetFotoFile" type="file" accept="image/*">
+<button onclick="gantiFotoUser()">Ganti Foto</button>
 
 <h4>Data Anggota Terdaftar</h4>
 <table border="1" id="devList"></table>
