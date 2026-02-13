@@ -7,7 +7,15 @@
   <a href="dev.html"><button>Daftar KTA</button></a>
 </div>
 <table border="1" id="list"></table>
-<a href="profile.html">Profil</a>
+<br>
+<a id="profileLink" href="profile.html">Profil</a>
+
+<div id="guestPrompt" style="display:none; margin-top:16px; border:1px solid #999; padding:10px; max-width:360px;">
+  <p style="margin-top:0;">Anda harus login untuk membuka profil.</p>
+  <button id="guestLoginBtn">Login</button>
+  <button id="guestCancelBtn">Tidak</button>
+</div>
+
 <script type="module" src="js/dashboard.js"></script>
 </body>
 </html>
