@@ -33,23 +33,10 @@ export function ktaToEmail(kta) {
 }
 
 export async function seedUsersIfNeeded() {
-  try {
-    const devRef = doc(db, USERS_COLLECTION, "0812180001");
-    const devSnap = await getDoc(devRef);
-    if (!devSnap.exists()) {
-      await setDoc(devRef, {
-        no_kta: "0812180001",
-        nama: "Developer",
-        status: "Developer",
-        join: "01/2024",
-        foto: "img/default.png",
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-    }
-  } catch (error) {
-    throw withFirestoreGuidance(error);
-  }
+  // No-op by design.
+  // Data seeding should be done from Firebase Console/Admin context, not from public clients.
+  // This keeps Firestore rules secure and avoids requiring unauthenticated write access.
+  return Promise.resolve();
 }
 
 export async function getUsers() {
