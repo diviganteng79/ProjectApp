@@ -3,8 +3,11 @@ import { seedUsersIfNeeded, findUserByKta } from "./store.js";
 async function initProfile() {
   await seedUsersIfNeeded();
   const kta = localStorage.getItem("login");
-  if (!kta) {
-    location.href = "index.html";
+  const guest = localStorage.getItem("guest_mode") === "1";
+
+  if (guest || !kta) {
+    alert("Anda harus login untuk membuka profil.");
+    location.href = "dashboard.html";
     return;
   }
 
@@ -20,6 +23,7 @@ async function initProfile() {
 
 function logout() {
   localStorage.removeItem("login");
+  localStorage.removeItem("guest_mode");
   location.href = "index.html";
 }
 
