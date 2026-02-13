@@ -38,6 +38,7 @@ async function login() {
 
   sessionStorage.removeItem("pending_kta");
   localStorage.setItem("login", kta);
+  localStorage.removeItem("guest_mode");
   location.href = kta === "0812180001" ? "dev.html" : "dashboard.html";
 }
 
