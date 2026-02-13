@@ -11,14 +11,20 @@ function getPendingKta() {
 }
 
 async function initSetPassword() {
-  await seedUsersIfNeeded();
-  const kta = getPendingKta();
-  if (!kta || !(await findUserByKta(kta))) {
-    alert("Nomor KTA belum dipilih. Silakan cek KTA dulu.");
-    location.href = "index.html";
-    return;
+  try {
+    await seedUsersIfNeeded();
+    const kta = getPendingKta();
+    if (!kta || !(await findUserByKta(kta))) {
+      alert("Nomor KTA belum dipilih. Silakan cek KTA dulu.");
+      location.href = "index.html";
+      return;
+    }
+    setHint("Buat kata sandi untuk KTA: " + kta);
+  } catch (error) {
+    console.error(error);
+    alert(error.message || "Gagal menyiapkan halaman buat kata sandi.");
+    setHint("Terjadi kendala saat mengakses data. Cek Rules Firestore.");
   }
-  setHint("Buat kata sandi untuk KTA: " + kta);
 }
 
 async function createPassword() {
@@ -35,18 +41,31 @@ async function createPassword() {
   if (!p1 || !p2) return alert("Isi kata sandi dan ulangi kata sandi");
   if (p1 !== p2) return alert("Ulangi kata sandi tidak sama");
 
-  const email = ktaToEmail(kta);
-  const methods = await fetchSignInMethodsForEmail(auth, email);
-  if (methods.length) {
-    alert("Kata sandi sudah dibuat sebelumnya. Silakan login.");
-    location.href = "login.html";
-    return;
-  }
+  try {
+    const email = ktaToEmail(kta);
+    const methods = await fetchSignInMethodsForEmail(auth, email);
+    if (methods.length) {
+      alert("Kata sandi sudah dibuat sebelumnya. Silakan login.");
+      location.href = "login.html";
+      return;
+    }
 
-  await createUserWithEmailAndPassword(auth, email, p1);
-  localStorage.setItem("login", kta);
-  alert("Kata sandi berhasil dibuat");
-  location.href = kta === "0812180001" ? "dev.html" : "dashboard.html";
+    await createUserWithEmailAndPassword(auth, email, p1);
+    alert("Kata sandi berhasil dibuat. Silakan login.");
+    location.href = "login.html";
+  } catch (error) {
+    console.error(error);
+    if (error?.code === "auth/weak-password") {
+      alert("Kata sandi terlalu lemah. Gunakan minimal 6 karakter.");
+      return;
+    }
+    if (error?.code === "auth/email-already-in-use") {
+      alert("Kata sandi sudah pernah dibuat. Silakan login.");
+      location.href = "login.html";
+      return;
+    }
+    alert(error.message || "Gagal menyimpan kata sandi.");
+  }
 }
 
 window.createPassword = createPassword;
