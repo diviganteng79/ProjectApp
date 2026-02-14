@@ -1,9 +1,17 @@
 import { auth } from "./firebase.js";
-import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { seedUsersIfNeeded, findUserByKta, ktaToEmail } from "./store.js";
+import { signInWithEmailAndPassword, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { seedUsersIfNeeded, findUserByKta, ktaToEmail, setUserPasswordStatus } from "./store.js";
 
 function setHint(message) {
   document.getElementById("hint").textContent = message || "";
+}
+
+async function markPasswordStatus(kta) {
+  try {
+    await setUserPasswordStatus(kta, true);
+  } catch (error) {
+    console.warn("Gagal menyimpan status hasPassword:", error);
+  }
 }
 
 async function initLoginForm() {
@@ -29,12 +37,21 @@ async function login() {
     await signInWithEmailAndPassword(auth, ktaToEmail(kta), pass);
   } catch (e) {
     if (e.code === "auth/invalid-credential") {
-      alert("Password salah / akun belum dibuat");
+      const methods = await fetchSignInMethodsForEmail(auth, ktaToEmail(kta));
+      if (!methods.length) {
+        alert("Akun KTA ini belum memiliki kata sandi. Silakan buat kata sandi dulu.");
+        sessionStorage.setItem("pending_kta", kta);
+        location.href = "set-password.html";
+        return;
+      }
+      alert("Password salah. Silakan coba lagi.");
       return;
     }
     alert("Gagal login: " + e.message);
     return;
   }
+
+  await markPasswordStatus(kta);
 
   sessionStorage.removeItem("pending_kta");
   localStorage.setItem("login", kta);
