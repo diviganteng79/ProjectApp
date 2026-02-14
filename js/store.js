@@ -93,3 +93,20 @@ export function subscribeUsers(callback) {
     }
   );
 }
+
+export async function setUserPasswordStatus(kta, hasPassword = true) {
+  try {
+    const ref = doc(db, USERS_COLLECTION, String(kta).trim());
+    await setDoc(
+      ref,
+      {
+        no_kta: String(kta).trim(),
+        hasPassword: Boolean(hasPassword),
+        updatedAt: serverTimestamp()
+      },
+      { merge: true }
+    );
+  } catch (error) {
+    throw withFirestoreGuidance(error);
+  }
+}
