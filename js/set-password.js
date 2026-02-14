@@ -10,6 +10,15 @@ function getPendingKta() {
   return (sessionStorage.getItem("pending_kta") || "").trim();
 }
 
+async function markPasswordStatus(kta) {
+  try {
+    await setUserPasswordStatus(kta, true);
+  } catch (error) {
+    // Jangan blokir alur pengguna jika update Firestore ditolak oleh rules.
+    console.warn("Gagal menyimpan status hasPassword:", error);
+  }
+}
+
 async function initSetPassword() {
   try {
     await seedUsersIfNeeded();
@@ -45,13 +54,14 @@ async function createPassword() {
     const email = ktaToEmail(kta);
     const methods = await fetchSignInMethodsForEmail(auth, email);
     if (methods.length) {
+      await markPasswordStatus(kta);
       alert("Kata sandi sudah dibuat sebelumnya. Silakan login.");
       location.href = "login.html";
       return;
     }
 
     await createUserWithEmailAndPassword(auth, email, p1);
-    await setUserPasswordStatus(kta, true);
+    await markPasswordStatus(kta);
     alert("Kata sandi berhasil dibuat. Silakan login.");
     location.href = "login.html";
   } catch (error) {
@@ -61,7 +71,7 @@ async function createPassword() {
       return;
     }
     if (error?.code === "auth/email-already-in-use") {
-      await setUserPasswordStatus(kta, true);
+      await markPasswordStatus(kta);
       alert("Kata sandi sudah pernah dibuat. Silakan login.");
       location.href = "login.html";
       return;
