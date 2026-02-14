@@ -37,31 +37,18 @@ async function initSetPassword() {
 }
 
 async function createPassword() {
-  const kta = getPendingKta();
-  if (!kta) {
-    alert("Nomor KTA belum dipilih.");
-    location.href = "index.html";
-    return;
-  }
-
-  const p1 = document.getElementById("newPass").value;
-  const p2 = document.getElementById("confirmPass").value;
-
-  if (!p1 || !p2) return alert("Isi kata sandi dan ulangi kata sandi");
-  if (p1 !== p2) return alert("Ulangi kata sandi tidak sama");
+   if (p1 !== p2) return alert("Ulangi kata sandi tidak sama");
 
   try {
     const email = ktaToEmail(kta);
     const methods = await fetchSignInMethodsForEmail(auth, email);
     if (methods.length) {
-      await markPasswordStatus(kta);
       alert("Kata sandi sudah dibuat sebelumnya. Silakan login.");
       location.href = "login.html";
       return;
     }
 
     await createUserWithEmailAndPassword(auth, email, p1);
-    await markPasswordStatus(kta);
     alert("Kata sandi berhasil dibuat. Silakan login.");
     location.href = "login.html";
   } catch (error) {
@@ -71,9 +58,16 @@ async function createPassword() {
       return;
     }
     if (error?.code === "auth/email-already-in-use") {
-      await markPasswordStatus(kta);
       alert("Kata sandi sudah pernah dibuat. Silakan login.");
       location.href = "login.html";
+      return;
+    }
+    if (error?.code === "auth/operation-not-allowed") {
+      alert("Metode Email/Password belum aktif di Firebase Authentication. Aktifkan di Sign-in method.");
+      return;
+    }
+    if (error?.code === "auth/network-request-failed") {
+      alert("Gagal terhubung ke Firebase. Periksa koneksi internet Anda.");
       return;
     }
     alert(error.message || "Gagal menyimpan kata sandi.");
