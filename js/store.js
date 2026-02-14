@@ -17,10 +17,10 @@ function isPermissionDenied(error) {
   return error?.code === "permission-denied" || String(error?.message || "").includes("Missing or insufficient permissions");
 }
 
-function withFirestoreGuidance(error) {
+function withFirestoreGuidance(error, action = "mengakses") {
   if (isPermissionDenied(error)) {
     const e = new Error(
-      "Akses database ditolak. Atur Firestore Rules agar halaman cek KTA bisa membaca collection users (minimal read untuk users)."
+      `Akses database ditolak saat ${action}. Periksa Firestore Rules untuk collection users.`
     );
     e.original = error;
     return e;
@@ -45,7 +45,7 @@ export async function getUsers() {
     const snap = await getDocs(q);
     return snap.docs.map((x) => x.data());
   } catch (error) {
-    throw withFirestoreGuidance(error);
+    throw withFirestoreGuidance(error, "membaca data users");
   }
 }
 
@@ -55,7 +55,7 @@ export async function findUserByKta(kta) {
     const snap = await getDoc(ref);
     return snap.exists() ? snap.data() : null;
   } catch (error) {
-    throw withFirestoreGuidance(error);
+    throw withFirestoreGuidance(error, "membaca data users");
   }
 }
 
@@ -76,7 +76,7 @@ export async function upsertUser(user) {
       { merge: true }
     );
   } catch (error) {
-    throw withFirestoreGuidance(error);
+    throw withFirestoreGuidance(error, "menulis data users");
   }
 }
 
@@ -89,24 +89,7 @@ export function subscribeUsers(callback) {
       callback(users);
     },
     (error) => {
-      throw withFirestoreGuidance(error);
+      throw withFirestoreGuidance(error, "mendengarkan perubahan data users");
     }
   );
-}
-
-export async function setUserPasswordStatus(kta, hasPassword = true) {
-  try {
-    const ref = doc(db, USERS_COLLECTION, String(kta).trim());
-    await setDoc(
-      ref,
-      {
-        no_kta: String(kta).trim(),
-        hasPassword: Boolean(hasPassword),
-        updatedAt: serverTimestamp()
-      },
-      { merge: true }
-    );
-  } catch (error) {
-    throw withFirestoreGuidance(error);
-  }
 }
