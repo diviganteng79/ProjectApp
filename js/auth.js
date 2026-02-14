@@ -1,17 +1,9 @@
 import { auth } from "./firebase.js";
 import { signInWithEmailAndPassword, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { seedUsersIfNeeded, findUserByKta, ktaToEmail, setUserPasswordStatus } from "./store.js";
+import { seedUsersIfNeeded, findUserByKta, ktaToEmail } from "./store.js";
 
 function setHint(message) {
   document.getElementById("hint").textContent = message || "";
-}
-
-async function markPasswordStatus(kta) {
-  try {
-    await setUserPasswordStatus(kta, true);
-  } catch (error) {
-    console.warn("Gagal menyimpan status hasPassword:", error);
-  }
 }
 
 async function initLoginForm() {
@@ -39,19 +31,23 @@ async function login() {
     if (e.code === "auth/invalid-credential") {
       const methods = await fetchSignInMethodsForEmail(auth, ktaToEmail(kta));
       if (!methods.length) {
-        alert("Akun KTA ini belum memiliki kata sandi. Silakan buat kata sandi dulu.");
-        sessionStorage.setItem("pending_kta", kta);
-        location.href = "set-password.html";
+        alert("Akun belum memiliki kata sandi. Silakan kembali ke cek KTA untuk membuat kata sandi.");
         return;
       }
       alert("Password salah. Silakan coba lagi.");
       return;
     }
+    if (e.code === "auth/too-many-requests") {
+      alert("Terlalu banyak percobaan login. Coba lagi beberapa saat lagi.");
+      return;
+    }
+    if (e.code === "auth/network-request-failed") {
+      alert("Gagal terhubung ke Firebase. Periksa koneksi internet Anda.");
+      return;
+    }
     alert("Gagal login: " + e.message);
     return;
   }
-
-  await markPasswordStatus(kta);
 
   sessionStorage.removeItem("pending_kta");
   localStorage.setItem("login", kta);
