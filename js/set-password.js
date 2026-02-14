@@ -1,6 +1,6 @@
 import { auth } from "./firebase.js";
 import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { seedUsersIfNeeded, findUserByKta, ktaToEmail } from "./store.js";
+import { seedUsersIfNeeded, findUserByKta, ktaToEmail, setUserPasswordStatus } from "./store.js";
 
 function setHint(message) {
   document.getElementById("hint").textContent = message || "";
@@ -51,6 +51,7 @@ async function createPassword() {
     }
 
     await createUserWithEmailAndPassword(auth, email, p1);
+    await setUserPasswordStatus(kta, true);
     alert("Kata sandi berhasil dibuat. Silakan login.");
     location.href = "login.html";
   } catch (error) {
@@ -60,6 +61,7 @@ async function createPassword() {
       return;
     }
     if (error?.code === "auth/email-already-in-use") {
+      await setUserPasswordStatus(kta, true);
       alert("Kata sandi sudah pernah dibuat. Silakan login.");
       location.href = "login.html";
       return;
