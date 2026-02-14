@@ -34,11 +34,13 @@ async function checkKta() {
       return;
     }
 
-    const hasPassword = Boolean(user?.hasPassword) || methods.length > 0;
+    // Default ke login untuk user terdaftar, kecuali secara eksplisit ditandai belum punya password.
+    // Ini menghindari kasus fetchSignInMethodsForEmail kosong walau akun sebenarnya sudah ada.
+    const shouldGoToLogin = user ? user.hasPassword !== false : methods.length > 0;
 
     localStorage.removeItem("guest_mode");
     sessionStorage.setItem("pending_kta", kta);
-    location.href = hasPassword ? "login.html" : "set-password.html";
+    location.href = shouldGoToLogin ? "login.html" : "set-password.html";
   } catch (error) {
     console.error(error);
     alert(error.message || "Gagal memeriksa nomor KTA.");
