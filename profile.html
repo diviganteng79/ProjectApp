@@ -1,9 +1,20 @@
 <!DOCTYPE html>
 <html>
-<head><title>Profil</title></head>
+<head>
+  <title>Profil</title>
+  <style>
+    #foto {
+      display: block;
+      width: 220px;
+      height: 140px;
+      object-fit: cover;
+      object-position: center;
+      border: 1px solid #aaa;
+    }
+  </style>
+</head>
 <body>
-<img id="foto" width="170" height="220" style="object-fit:cover; border:1px solid #aaa;"><br>
-<img id="foto" width="220" height="140" style="object-fit:cover; border:1px solid #aaa;"><br>
+<img id="foto" alt="Foto Profil KTA"><br>
 <a href="dashboard.html"><button>Kembali ke Beranda</button></a>
 <button onclick="logout()">Logout</button>
 <script type="module" src="js/profile.js"></script>
